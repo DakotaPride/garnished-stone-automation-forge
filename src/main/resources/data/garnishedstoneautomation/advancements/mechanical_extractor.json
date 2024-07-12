@@ -1,0 +1,38 @@
+{
+  "display": {
+    "icon": {
+      "item": "garnishedstoneautomation:mechanical_extractor"
+    },
+    "title": {
+      "translate": "advancement.garnishedstoneautomation.mechanical_extractor.title"
+    },
+    "description": {
+      "translate": "advancement.garnishedstoneautomation.mechanical_extractor.description",
+      "color": "#DBA213"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "garnished:liquid_mastic_resin",
+  "criteria": {
+    "mechanical_extractor": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "garnishedstoneautomation:mechanical_extractor"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "mechanical_extractor"
+    ]
+  ]
+}

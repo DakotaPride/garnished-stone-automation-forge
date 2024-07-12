@@ -1,0 +1,30 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:stone",
+    "minecraft:granite",
+    "minecraft:diorite",
+    "minecraft:andesite",
+    "minecraft:deepslate",
+    "minecraft:blackstone",
+    "minecraft:basalt",
+    "minecraft:netherrack",
+    "minecraft:end_stone",
+    {
+      "required": false,
+      "id": "garnished:abyssal_stone"
+    },
+    {
+      "required": false,
+      "id": "garnished:unstable_stone"
+    },
+    {
+      "required": false,
+      "id": "garnished:carnotite"
+    },
+    {
+      "required": false,
+      "id": "garnished:ritualistic_stone"
+    }
+  ]
+}

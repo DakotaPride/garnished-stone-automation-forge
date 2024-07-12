@@ -1,0 +1,33 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "tag": "garnishedstoneautomation:acceptable_stone_ingredients"
+  },
+  "loops": 9,
+  "results": [
+    {
+      "item": "create:ochrum"
+    }
+  ],
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "garnishedstoneautomation:incomplete_ochrum"
+        },
+        {
+          "item": "garnishedstoneautomation:ochrum_cluster"
+        }
+      ],
+      "results": [
+        {
+          "item": "garnishedstoneautomation:incomplete_ochrum"
+        }
+      ]
+    }
+  ],
+  "transitionalItem": {
+    "item": "garnishedstoneautomation:incomplete_ochrum"
+  }
+}

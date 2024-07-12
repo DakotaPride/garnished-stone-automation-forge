@@ -1,0 +1,33 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "tag": "garnishedstoneautomation:acceptable_stone_ingredients"
+  },
+  "loops": 9,
+  "results": [
+    {
+      "item": "create:crimsite"
+    }
+  ],
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "garnishedstoneautomation:incomplete_crimsite"
+        },
+        {
+          "item": "garnishedstoneautomation:crimsite_cluster"
+        }
+      ],
+      "results": [
+        {
+          "item": "garnishedstoneautomation:incomplete_crimsite"
+        }
+      ]
+    }
+  ],
+  "transitionalItem": {
+    "item": "garnishedstoneautomation:incomplete_crimsite"
+  }
+}

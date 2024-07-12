@@ -1,0 +1,23 @@
+{
+  "type": "create:mechanical_crafting",
+  "acceptMirrored": true,
+  "key": {
+    "C": {
+      "item": "create:cogwheel"
+    },
+    "I": {
+      "item": "minecraft:obsidian"
+    },
+    "S": {
+      "item": "create:brass_casing"
+    }
+  },
+  "pattern": [
+    "C",
+    "S",
+    "I"
+  ],
+  "result": {
+    "item": "garnishedstoneautomation:mechanical_extractor"
+  }
+}

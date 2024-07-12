@@ -1,0 +1,33 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "tag": "garnishedstoneautomation:acceptable_stone_ingredients"
+  },
+  "loops": 9,
+  "results": [
+    {
+      "item": "create:asurine"
+    }
+  ],
+  "sequence": [
+    {
+      "type": "create:deploying",
+      "ingredients": [
+        {
+          "item": "garnishedstoneautomation:incomplete_asurine"
+        },
+        {
+          "item": "garnishedstoneautomation:asurine_cluster"
+        }
+      ],
+      "results": [
+        {
+          "item": "garnishedstoneautomation:incomplete_asurine"
+        }
+      ]
+    }
+  ],
+  "transitionalItem": {
+    "item": "garnishedstoneautomation:incomplete_asurine"
+  }
+}
