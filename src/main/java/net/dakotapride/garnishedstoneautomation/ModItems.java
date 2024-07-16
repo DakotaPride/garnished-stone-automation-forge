@@ -1,5 +1,6 @@
 package net.dakotapride.garnishedstoneautomation;
 
+import com.simibubi.create.content.processing.sequenced.SequencedAssemblyItem;
 import com.tterrag.registrate.util.entry.ItemEntry;
 import net.minecraft.world.item.Item;
 
@@ -7,10 +8,10 @@ import static net.dakotapride.garnishedstoneautomation.GarnishedStoneAutomation.
 
 public class ModItems {
 	// Incomplete Processing Items
-	public static final ItemEntry<Item> INCOMPLETE_CRIMSITE = REGISTRATE.item("incomplete_crimsite", Item::new).register();
-	public static final ItemEntry<Item> INCOMPLETE_VERIDIUM = REGISTRATE.item("incomplete_veridium", Item::new).register();
-	public static final ItemEntry<Item> INCOMPLETE_ASURINE = REGISTRATE.item("incomplete_asurine", Item::new).register();
-	public static final ItemEntry<Item> INCOMPLETE_OCHRUM = REGISTRATE.item("incomplete_ochrum", Item::new).register();
+	public static final ItemEntry<SequencedAssemblyItem> INCOMPLETE_CRIMSITE = REGISTRATE.item("incomplete_crimsite", SequencedAssemblyItem::new).register();
+	public static final ItemEntry<SequencedAssemblyItem> INCOMPLETE_VERIDIUM = REGISTRATE.item("incomplete_veridium", SequencedAssemblyItem::new).register();
+	public static final ItemEntry<SequencedAssemblyItem> INCOMPLETE_ASURINE = REGISTRATE.item("incomplete_asurine", SequencedAssemblyItem::new).register();
+	public static final ItemEntry<SequencedAssemblyItem> INCOMPLETE_OCHRUM = REGISTRATE.item("incomplete_ochrum", SequencedAssemblyItem::new).register();
 
 	// Vehement Clusters
 	public static final ItemEntry<Item> CRIMSITE_CLUSTER = REGISTRATE.item("crimsite_cluster", Item::new).register();
