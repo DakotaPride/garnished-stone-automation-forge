@@ -1,12 +1,9 @@
 package net.dakotapride.garnishedstoneautomation.compat.jei;
 
-import com.simibubi.create.Create;
 import com.simibubi.create.compat.jei.*;
 import com.simibubi.create.compat.jei.category.CreateRecipeCategory;
 import com.simibubi.create.content.decoration.palettes.AllPaletteStoneTypes;
 import com.simibubi.create.foundation.recipe.IRecipeTypeInfo;
-import com.simibubi.create.foundation.utility.Components;
-import com.simibubi.create.foundation.utility.Lang;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 import com.simibubi.create.infrastructure.config.CRecipes;
 import mezz.jei.api.IModPlugin;
@@ -43,7 +40,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.simibubi.create.compat.jei.CreateJEI.consumeTypedRecipes;
-import static com.simibubi.create.foundation.utility.Lang.resolveBuilders;
+import static net.createmod.catnip.lang.LangBuilder.resolveBuilders;
 
 @JeiPlugin
 @SuppressWarnings("unused")
@@ -311,6 +308,6 @@ public class GarnishedStoneAutomationJEI implements IModPlugin {
     }
 
     public static MutableComponent translateDirect(String key, Object... args) {
-        return Components.translatable("recipe." + GarnishedStoneAutomation.MOD_ID + "." + key, resolveBuilders(args));
+        return Component.translatable("recipe." + GarnishedStoneAutomation.MOD_ID + "." + key, resolveBuilders(args));
     }
 }

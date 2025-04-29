@@ -6,6 +6,9 @@ import com.simibubi.create.foundation.item.ItemDescription;
 import com.simibubi.create.foundation.item.KineticStats;
 import com.simibubi.create.foundation.item.TooltipHelper;
 import com.simibubi.create.foundation.item.TooltipModifier;
+import com.simibubi.create.foundation.ponder.CreatePonderPlugin;
+import net.createmod.catnip.lang.FontHelper;
+import net.createmod.ponder.foundation.PonderIndex;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
@@ -66,7 +69,7 @@ public class GarnishedStoneAutomation {
 
     static {
         REGISTRATE.setTooltipModifierFactory(item -> {
-            return new ItemDescription.Modifier(item, TooltipHelper.Palette.STANDARD_CREATE)
+            return new ItemDescription.Modifier(item, FontHelper.Palette.STANDARD_CREATE)
                     .andThen(TooltipModifier.mapNull(KineticStats.create(item)));
         });
     }
@@ -93,7 +96,7 @@ public class GarnishedStoneAutomation {
             LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
 
 
-            ModPonderScenes.init();
+            PonderIndex.addPlugin(new ModPonderScenes());
 
             ItemBlockRenderTypes.setRenderLayer(ModBlocks.MECHANICAL_EXTRACTOR.get(), RenderType.cutout());
         }

@@ -4,12 +4,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.compat.jei.category.animations.AnimatedKinetics;
 import com.simibubi.create.foundation.gui.AllGuiTextures;
-import com.simibubi.create.foundation.utility.Components;
-import com.simibubi.create.foundation.utility.Lang;
 import net.dakotapride.garnishedstoneautomation.ModBlocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+
+import static net.createmod.catnip.lang.LangBuilder.resolveBuilders;
 
 public class AnimatedMechanicalExtractor extends AnimatedKinetics {
 
@@ -39,7 +40,7 @@ public class AnimatedMechanicalExtractor extends AnimatedKinetics {
     }
 
     public static MutableComponent getHeatingRequirementComponent(String key, Object... args) {
-        return Components.translatable(key, Lang.resolveBuilders(args));
+        return Component.translatable(key, resolveBuilders(args));
     }
 
 }

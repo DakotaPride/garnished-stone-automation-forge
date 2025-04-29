@@ -1,8 +1,10 @@
 package net.dakotapride.garnishedstoneautomation;
 
-import com.simibubi.create.content.kinetics.BlockStressDefaults;
+import com.simibubi.create.api.stress.BlockStressValues;
 import com.simibubi.create.foundation.data.AssetLookup;
 import com.simibubi.create.foundation.data.SharedProperties;
+import com.simibubi.create.infrastructure.config.CStress;
+import com.tterrag.registrate.builders.BlockBuilder;
 import com.tterrag.registrate.util.entry.BlockEntry;
 import net.dakotapride.garnishedstoneautomation.extractor.MechanicalExtractorBlock;
 import net.minecraft.core.DefaultedRegistry;
@@ -11,6 +13,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.MapColor;
+
+import java.util.function.UnaryOperator;
 
 import static com.simibubi.create.foundation.data.ModelGen.customItemModel;
 import static com.simibubi.create.foundation.data.TagGen.pickaxeOnly;
@@ -23,7 +27,7 @@ public class ModBlocks {
                     .properties(p -> p.mapColor(MapColor.TERRACOTTA_BROWN).noOcclusion().requiresCorrectToolForDrops())
                     .transform(pickaxeOnly())
                     .blockstate((c, p) -> p.simpleBlock(c.getEntry(), AssetLookup.partialBaseModel(c, p)))
-                    .transform(BlockStressDefaults.setImpact(8.0D))
+                    //.transform(CStress.setImpact(8.0D))
                     .item()
                     .transform(customItemModel())
                     // .tag(AllTags.AllBlockTags.SAFE_NBT.tag)
@@ -36,6 +40,11 @@ public class ModBlocks {
     public static void init() {
         // load the class and register everything
         GarnishedStoneAutomation.LOGGER.info("Registering blocks for " + GarnishedStoneAutomation.NAME);
+
+        BlockStressValues.IMPACTS.registerProvider((block) -> {
+            if (block == MECHANICAL_EXTRACTOR.get()) return () -> 8.0D;
+            else return null;
+        });
     }
 
     static {
