@@ -162,7 +162,7 @@ public class ExtractorPonderScenes {
             BlockPos beltPos = util.grid().at(1, 1, 2);
             scene.world().createItemOnBelt(beltPos, Direction.EAST, vehementCluster);
             builder.idle(15);
-            scene.world().createItemOnBelt(beltPos, Direction.EAST, new ItemStack(ModItems.ASURINE_CLUSTER, 2));
+            scene.world().createItemOnBelt(beltPos, Direction.EAST, new ItemStack(ModItems.ASURINE_CLUSTER.get(), 2));
             builder.idle(20);
 
             builder.overlay().showText(50)
@@ -180,13 +180,13 @@ public class ExtractorPonderScenes {
             builder.addKeyframe();
 
             // scene.world().modifyBlock(util.grid().at(2, 1, 2), s);
-            ItemStack itemStack1 = new ItemStack(ModItems.ASURINE_CLUSTER);
+            ItemStack itemStack1 = new ItemStack(ModItems.ASURINE_CLUSTER.get());
             Vec3 entitySpawn1 = util.vector().topOf(util.grid().at(2, 1, 1));
-            ItemStack itemStack2 = new ItemStack(ModItems.VERIDIUM_CLUSTER);
+            ItemStack itemStack2 = new ItemStack(ModItems.VERIDIUM_CLUSTER.get());
             Vec3 entitySpawn2 = util.vector().topOf(util.grid().at(3, 0, 3));
-            ItemStack itemStack3 = new ItemStack(ModItems.CRIMSITE_CLUSTER);
+            ItemStack itemStack3 = new ItemStack(ModItems.CRIMSITE_CLUSTER.get());
             Vec3 entitySpawn3 = util.vector().topOf(util.grid().at(4, 0, 2));
-            ItemStack itemStack4 = new ItemStack(ModItems.OCHRUM_CLUSTER);
+            ItemStack itemStack4 = new ItemStack(ModItems.OCHRUM_CLUSTER.get());
             Vec3 entitySpawn4 = util.vector().topOf(util.grid().at(3, 0, 0));
 
             ElementLink<EntityElement> entity2 =
@@ -244,7 +244,7 @@ public class ExtractorPonderScenes {
             builder.overlay().showControls(util.vector().blockSurface(deployerPosition.below(), Direction.EAST).add(0, 0.15, 0), Pointing.RIGHT, 30).withItem(vehementCluster);
             builder.idle(7);
             builder.world().modifyBlockEntityNBT(deployerSelection, DeployerBlockEntity.class,
-                    nbt -> nbt.put("HeldItem", vehementCluster.serializeNBT()));
+                    nbt -> nbt.put("HeldItem", vehementCluster.saveOptional(scene.world().getHolderLookupProvider())));
             builder.idle(25);
 
             builder.world().showSection(util.select().fromTo(4, 1, 2, 0, 1, 2), Direction.SOUTH);

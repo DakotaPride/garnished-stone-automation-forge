@@ -13,24 +13,24 @@ import net.dakotapride.garnishedstoneautomation.ModBlocks;
 import net.dakotapride.garnishedstoneautomation.ModRecipeTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
-import net.minecraftforge.items.ItemStackHandler;
-import net.minecraftforge.items.wrapper.CombinedInvWrapper;
-import net.minecraftforge.items.wrapper.RecipeWrapper;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.items.ItemStackHandler;
+import net.neoforged.neoforge.items.wrapper.CombinedInvWrapper;
+import net.neoforged.neoforge.items.wrapper.RecipeWrapper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -40,7 +40,7 @@ public class MechanicalExtractorBlockEntity extends KineticBlockEntity implement
 
     public ItemStackHandler inputInv;
     public ItemStackHandler outputInv;
-    public LazyOptional<IItemHandler> capability;
+    public IItemHandler capability;
     public int timer;
     private ExtractingRecipe lastRecipe;
 
@@ -48,7 +48,7 @@ public class MechanicalExtractorBlockEntity extends KineticBlockEntity implement
         super(type, pos, state);
         inputInv = new ItemStackHandler(1);
         outputInv = new ItemStackHandler(9);
-        capability = LazyOptional.of(ExtractorInventoryHandler::new);
+        capability = new ExtractorInventoryHandler();
     }
 
     @Override
@@ -134,14 +134,13 @@ public class MechanicalExtractorBlockEntity extends KineticBlockEntity implement
             return;
 
         RecipeWrapper inventoryIn = new RecipeWrapper(inputInv);
-
-        if (lastRecipe == null || !lastRecipe.matches(inventoryIn, level) || !(level.getBlockState(this.getBlockPos().below()).is(ModBlocks.HEAT_SOURCES_FORGE))) {
-            Optional<ExtractingRecipe> recipe = ModRecipeTypes.EXTRACTING.find(inventoryIn, level);
+        if (lastRecipe == null || !lastRecipe.matches(inventoryIn, level)) {
+            Optional<RecipeHolder<ExtractingRecipe>> recipe = ModRecipeTypes.EXTRACTING.find(inventoryIn, level);
             if (!recipe.isPresent()) {
                 timer = 100;
                 sendData();
             } else {
-                lastRecipe = recipe.get();
+                lastRecipe = recipe.get().value();
                 timer = lastRecipe.getProcessingDuration();
                 sendData();
             }
@@ -168,10 +167,10 @@ public class MechanicalExtractorBlockEntity extends KineticBlockEntity implement
         RecipeWrapper inventoryIn = new RecipeWrapper(inputInv);
 
         if (lastRecipe == null || !lastRecipe.matches(inventoryIn, level) || !(level.getBlockState(this.getBlockPos().below()).is(ModBlocks.HEAT_SOURCES_FORGE))) {
-            Optional<ExtractingRecipe> recipe = ModRecipeTypes.EXTRACTING.find(inventoryIn, level);
+            Optional<RecipeHolder<ExtractingRecipe>> recipe = ModRecipeTypes.EXTRACTING.find(inventoryIn, level);
             if (!recipe.isPresent())
                 return;
-            lastRecipe = recipe.get();
+            lastRecipe = recipe.get().value();
         }
 
         ItemStack stackInSlot = inputInv.getStackInSlot(0);
@@ -202,39 +201,41 @@ public class MechanicalExtractorBlockEntity extends KineticBlockEntity implement
     }
 
     @Override
-    public void write(CompoundTag compound, boolean clientPacket) {
+    public void write(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
         compound.putInt("Timer", timer);
-        compound.put("InputInventory", inputInv.serializeNBT());
-        compound.put("OutputInventory", outputInv.serializeNBT());
-        super.write(compound, clientPacket);
+        compound.put("InputInventory", inputInv.serializeNBT(registries));
+        compound.put("OutputInventory", outputInv.serializeNBT(registries));
+        super.write(compound, registries, clientPacket);
     }
 
     @Override
-    protected void read(CompoundTag compound, boolean clientPacket) {
+    protected void read(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
         timer = compound.getInt("Timer");
-        inputInv.deserializeNBT(compound.getCompound("InputInventory"));
-        outputInv.deserializeNBT(compound.getCompound("OutputInventory"));
-        super.read(compound, clientPacket);
+        inputInv.deserializeNBT(registries, compound.getCompound("InputInventory"));
+        outputInv.deserializeNBT(registries, compound.getCompound("OutputInventory"));
+        super.read(compound, registries, clientPacket);
     }
 
     public int getProcessingSpeed() {
         return Mth.clamp((int) Math.abs(getSpeed() / 16f), 1, 512);
     }
 
-    @Override
-    public <T> @NotNull LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
-        if (isItemHandlerCap(cap))
-            return capability.cast();
-        return super.getCapability(cap, side);
-    }
+//    @Override
+//    public <T> @NotNull LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
+//        if (isItemHandlerCap(cap))
+//            return capability.cast();
+//        return super.getCapability(cap, side);
+//    }
 
     private boolean canProcess(ItemStack stack) {
         ItemStackHandler tester = new ItemStackHandler(1);
         tester.setStackInSlot(0, stack);
         RecipeWrapper inventoryIn = new RecipeWrapper(tester);
 
-        if (lastRecipe != null && lastRecipe.matches(inventoryIn, level)  && (level.getBlockState(this.getBlockPos().below()).is(ModBlocks.HEAT_SOURCES_FORGE)))
+        if (lastRecipe != null && lastRecipe.matches(inventoryIn, level)
+                && (level.getBlockState(this.getBlockPos().below()).is(ModBlocks.HEAT_SOURCES_FORGE)))
             return true;
+
         return ModRecipeTypes.EXTRACTING.find(inventoryIn, level)
                 .isPresent() && level.getBlockState(this.getBlockPos().below()).is(ModBlocks.HEAT_SOURCES_FORGE);
     }

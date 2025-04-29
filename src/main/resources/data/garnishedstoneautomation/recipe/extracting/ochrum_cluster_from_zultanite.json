@@ -3,21 +3,21 @@
   "ingredients": [
     [
       {
-        "tag": "garnished:stone_types/zultanite/green"
+        "tag": "garnished:stone_types/zultanite/yellow"
       }
     ]
   ],
-  "processingTime": 200,
+  "processing_time": 200,
   "results": [
     {
       "chance": 0.65,
       "count": 2,
-      "item": "garnishedstoneautomation:veridium_cluster"
+      "id": "garnishedstoneautomation:ochrum_cluster"
     },
     {
       "chance": 0.15,
       "count": 1,
-      "item": "garnishedstoneautomation:veridium_cluster"
+      "id": "garnishedstoneautomation:ochrum_cluster"
     }
   ]
 }

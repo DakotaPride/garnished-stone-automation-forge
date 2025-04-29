@@ -21,6 +21,6 @@ public class ModItems {
 
 	public static void init() {
 		// load the class and register everything
-		GarnishedStoneAutomation.LOGGER.info("Registering items for " + GarnishedStoneAutomation.NAME);
+		//GarnishedStoneAutomation.LOGGER.info("Registering items for " + GarnishedStoneAutomation.NAME);
 	}
 }

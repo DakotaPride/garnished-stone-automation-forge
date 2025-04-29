@@ -3,21 +3,21 @@
   "ingredients": [
     [
       {
-        "tag": "garnished:stone_types/zultanite/yellow"
+        "tag": "garnished:stone_types/zultanite/blue"
       }
     ]
   ],
-  "processingTime": 200,
+  "processing_time": 200,
   "results": [
     {
       "chance": 0.65,
       "count": 2,
-      "item": "garnishedstoneautomation:ochrum_cluster"
+      "id": "garnishedstoneautomation:asurine_cluster"
     },
     {
       "chance": 0.15,
       "count": 1,
-      "item": "garnishedstoneautomation:ochrum_cluster"
+      "id": "garnishedstoneautomation:asurine_cluster"
     }
   ]
 }

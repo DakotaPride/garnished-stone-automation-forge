@@ -9,7 +9,7 @@ import net.dakotapride.garnishedstoneautomation.ModBlockEntityTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -20,11 +20,9 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.IItemHandlerModifiable;
-import net.minecraftforge.items.ItemStackHandler;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
 
 public class MechanicalExtractorBlock extends KineticBlock implements IBE<MechanicalExtractorBlockEntity>, ICogWheel, IWrenchable {
 
@@ -33,17 +31,15 @@ public class MechanicalExtractorBlock extends KineticBlock implements IBE<Mechan
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn,
-                                 BlockHitResult hit) {
-        if (!player.getItemInHand(handIn)
-                .isEmpty())
-            return InteractionResult.PASS;
-        if (worldIn.isClientSide)
-            return InteractionResult.SUCCESS;
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (!stack.isEmpty())
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        if (level.isClientSide)
+            return ItemInteractionResult.SUCCESS;
 
-        withBlockEntityDo(worldIn, pos, extractor -> {
+        withBlockEntityDo(level, pos, etxractor -> {
             boolean emptyOutput = true;
-            IItemHandlerModifiable inv = extractor.outputInv;
+            IItemHandlerModifiable inv = etxractor.outputInv;
             for (int slot = 0; slot < inv.getSlots(); slot++) {
                 ItemStack stackInSlot = inv.getStackInSlot(slot);
                 if (!stackInSlot.isEmpty())
@@ -54,7 +50,7 @@ public class MechanicalExtractorBlock extends KineticBlock implements IBE<Mechan
             }
 
             if (emptyOutput) {
-                inv = extractor.inputInv;
+                inv = etxractor.inputInv;
                 for (int slot = 0; slot < inv.getSlots(); slot++) {
                     player.getInventory()
                             .placeItemBackInInventory(inv.getStackInSlot(slot));
@@ -62,11 +58,11 @@ public class MechanicalExtractorBlock extends KineticBlock implements IBE<Mechan
                 }
             }
 
-            extractor.setChanged();
-            extractor.sendData();
+            etxractor.setChanged();
+            etxractor.sendData();
         });
 
-        return InteractionResult.SUCCESS;
+        return ItemInteractionResult.SUCCESS;
     }
 
     @Override
@@ -75,7 +71,7 @@ public class MechanicalExtractorBlock extends KineticBlock implements IBE<Mechan
 
         if (entityIn.level().isClientSide)
             return;
-        if (!(entityIn instanceof ItemEntity))
+        if (!(entityIn instanceof ItemEntity itemEntity))
             return;
         if (!entityIn.isAlive())
             return;
@@ -88,12 +84,11 @@ public class MechanicalExtractorBlock extends KineticBlock implements IBE<Mechan
         if (extractor == null)
             return;
 
-        ItemEntity itemEntity = (ItemEntity) entityIn;
-        LazyOptional<IItemHandler> capability = extractor.getCapability(ForgeCapabilities.ITEM_HANDLER);
-        if (!capability.isPresent())
+        IItemHandler capability = extractor.getLevel().getCapability(Capabilities.ItemHandler.BLOCK, extractor.getBlockPos(), null);
+        if (capability == null)
             return;
 
-        ItemStack remainder = capability.orElse(new ItemStackHandler())
+        ItemStack remainder = capability
                 .insertItem(0, itemEntity.getItem(), false);
         if (remainder.isEmpty())
             itemEntity.discard();
@@ -118,7 +113,7 @@ public class MechanicalExtractorBlock extends KineticBlock implements IBE<Mechan
     }
 
     @Override
-    public boolean isPathfindable(BlockState state, BlockGetter reader, BlockPos pos, PathComputationType type) {
+    protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
         return false;
     }
 

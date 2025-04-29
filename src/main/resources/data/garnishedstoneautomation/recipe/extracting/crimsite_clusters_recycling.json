@@ -2,24 +2,24 @@
   "type": "garnishedstoneautomation:extracting",
   "ingredients": [
     {
-      "item": "create:ochrum"
+      "item": "create:crimsite"
     }
   ],
-  "processingTime": 200,
+  "processing_time": 200,
   "results": [
     {
       "chance": 0.85,
       "count": 2,
-      "item": "garnishedstoneautomation:ochrum_cluster"
+      "id": "garnishedstoneautomation:crimsite_cluster"
     },
     {
       "chance": 0.05,
       "count": 2,
-      "item": "garnishedstoneautomation:ochrum_cluster"
+      "id": "garnishedstoneautomation:crimsite_cluster"
     },
     {
       "chance": 0.1,
-      "item": "garnishedstoneautomation:ochrum_cluster"
+      "id": "garnishedstoneautomation:crimsite_cluster"
     }
   ]
 }

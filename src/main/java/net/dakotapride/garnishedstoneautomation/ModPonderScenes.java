@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 public class ModPonderScenes implements PonderPlugin {
 
     public static void init(PonderSceneRegistrationHelper<ResourceLocation> helper) {
-        PonderSceneRegistrationHelper<ItemProviderEntry<?>> HELPER = helper.withKeyFunction(RegistryEntry::getId);
+        PonderSceneRegistrationHelper<ItemProviderEntry<?, ?>> HELPER = helper.withKeyFunction(RegistryEntry::getId);
         HELPER.forComponents(ModBlocks.MECHANICAL_EXTRACTOR).addStoryBoard("mechanical_extractor/intro", new ExtractorPonderScenes.Intro());
         HELPER.forComponents(ModBlocks.MECHANICAL_EXTRACTOR).addStoryBoard("mechanical_extractor/create_stones_processing", new ExtractorPonderScenes.CreateStoneProcessing());
         HELPER.forComponents(ModBlocks.MECHANICAL_EXTRACTOR).addStoryBoard("mechanical_extractor/creating_stone", new ExtractorPonderScenes.CreatingStones());

@@ -39,7 +39,7 @@ public class ModBlocks {
 
     public static void init() {
         // load the class and register everything
-        GarnishedStoneAutomation.LOGGER.info("Registering blocks for " + GarnishedStoneAutomation.NAME);
+        //GarnishedStoneAutomation.LOGGER.info("Registering blocks for " + GarnishedStoneAutomation.NAME);
 
         BlockStressValues.IMPACTS.registerProvider((block) -> {
             if (block == MECHANICAL_EXTRACTOR.get()) return () -> 8.0D;
@@ -55,9 +55,9 @@ public class ModBlocks {
 
     private static <T> TagKey<T> commonTag(String name, DefaultedRegistry<T> registry, boolean isForge) {
         if (isForge) {
-            return TagKey.create(registry.key(), new ResourceLocation("forge", name));
+            return TagKey.create(registry.key(), ResourceLocation.fromNamespaceAndPath("forge", name));
         } else {
-            return TagKey.create(registry.key(), new ResourceLocation("c", name));
+            return TagKey.create(registry.key(), ResourceLocation.fromNamespaceAndPath("c", name));
         }
     }
 }

@@ -6,7 +6,7 @@
   "loops": 9,
   "results": [
     {
-      "item": "create:veridium"
+      "id": "create:asurine"
     }
   ],
   "sequence": [
@@ -14,20 +14,20 @@
       "type": "create:deploying",
       "ingredients": [
         {
-          "item": "garnishedstoneautomation:incomplete_veridium"
+          "item": "garnishedstoneautomation:incomplete_asurine"
         },
         {
-          "item": "garnishedstoneautomation:veridium_cluster"
+          "item": "garnishedstoneautomation:asurine_cluster"
         }
       ],
       "results": [
         {
-          "item": "garnishedstoneautomation:incomplete_veridium"
+          "id": "garnishedstoneautomation:incomplete_asurine"
         }
       ]
     }
   ],
-  "transitionalItem": {
-    "item": "garnishedstoneautomation:incomplete_veridium"
+  "transitional_item": {
+    "id": "garnishedstoneautomation:incomplete_asurine"
   }
 }

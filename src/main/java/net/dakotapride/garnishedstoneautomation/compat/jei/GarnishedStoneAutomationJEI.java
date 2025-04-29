@@ -1,8 +1,10 @@
 package net.dakotapride.garnishedstoneautomation.compat.jei;
 
+import com.simibubi.create.AllRecipeTypes;
 import com.simibubi.create.compat.jei.*;
 import com.simibubi.create.compat.jei.category.CreateRecipeCategory;
 import com.simibubi.create.content.decoration.palettes.AllPaletteStoneTypes;
+import com.simibubi.create.foundation.item.ItemHelper;
 import com.simibubi.create.foundation.recipe.IRecipeTypeInfo;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 import com.simibubi.create.infrastructure.config.CRecipes;
@@ -17,36 +19,43 @@ import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import mezz.jei.api.runtime.IIngredientManager;
+import mezz.jei.api.runtime.IJeiRuntime;
+import net.createmod.catnip.config.ConfigBase;
 import net.dakotapride.garnishedstoneautomation.GarnishedStoneAutomation;
 import net.dakotapride.garnishedstoneautomation.ModBlocks;
 import net.dakotapride.garnishedstoneautomation.ModItems;
 import net.dakotapride.garnishedstoneautomation.ModRecipeTypes;
 import net.dakotapride.garnishedstoneautomation.extractor.ExtractingRecipe;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ItemLike;
 
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import static com.simibubi.create.compat.jei.CreateJEI.consumeTypedRecipes;
 import static net.createmod.catnip.lang.LangBuilder.resolveBuilders;
 
 @JeiPlugin
 @SuppressWarnings("unused")
 @ParametersAreNonnullByDefault
 public class GarnishedStoneAutomationJEI implements IModPlugin {
-    private static final ResourceLocation MOD_ID = new ResourceLocation(GarnishedStoneAutomation.MOD_ID, "jei_plugin");
+    private static final ResourceLocation MOD_ID = ResourceLocation.fromNamespaceAndPath(GarnishedStoneAutomation.MOD_ID, "jei_plugin");
 
     @Override
     @Nonnull
@@ -113,14 +122,14 @@ public class GarnishedStoneAutomationJEI implements IModPlugin {
         return new CategoryBuilder<>(recipeClass);
     }
 
-    private static class CategoryBuilder<T extends Recipe<?>> {
+    private class CategoryBuilder<T extends Recipe<? extends RecipeInput>> {
         private final Class<? extends T> recipeClass;
         private Predicate<CRecipes> predicate = cRecipes -> true;
 
         private IDrawable background;
         private IDrawable icon;
 
-        private final List<Consumer<List<T>>> recipeListConsumers = new ArrayList<>();
+        private final List<Consumer<List<RecipeHolder<T>>>> recipeListConsumers = new ArrayList<>();
         private final List<Supplier<? extends ItemStack>> catalysts = new ArrayList<>();
 
         public CategoryBuilder(Class<? extends T> recipeClass) {
@@ -132,29 +141,29 @@ public class GarnishedStoneAutomationJEI implements IModPlugin {
             return this;
         }
 
-        public CategoryBuilder<T> enableWhen(Function<CRecipes, Object> configValue) {
-            predicate = c -> (boolean) configValue.apply(c);
+        public CategoryBuilder<T> enableWhen(Function<CRecipes, ConfigBase.ConfigBool> configValue) {
+            predicate = c -> configValue.apply(c).get();
             return this;
         }
 
-        public CategoryBuilder<T> addRecipeListConsumer(Consumer<List<T>> consumer) {
+        public CategoryBuilder<T> addRecipeListConsumer(Consumer<List<RecipeHolder<T>>> consumer) {
             recipeListConsumers.add(consumer);
             return this;
         }
 
-        public CategoryBuilder<T> addRecipes(Supplier<Collection<? extends T>> collection) {
+        public CategoryBuilder<T> addRecipes(Supplier<Collection<? extends RecipeHolder<T>>> collection) {
             return addRecipeListConsumer(recipes -> recipes.addAll(collection.get()));
         }
 
-        public CategoryBuilder<T> addAllRecipesIf(Predicate<Recipe<?>> pred) {
-            return addRecipeListConsumer(recipes -> consumeAllRecipes(recipe -> {
-                if (pred.test(recipe)) {
-                    recipes.add((T) recipe);
-                }
+        @SuppressWarnings("unchecked")
+        public CategoryBuilder<T> addAllRecipesIf(Predicate<RecipeHolder<T>> pred) {
+            return addRecipeListConsumer(recipes -> consumeAllRecipesOfType(recipe -> {
+                if (pred.test(recipe))
+                    recipes.add(recipe);
             }));
         }
 
-        public CategoryBuilder<T> addAllRecipesIf(Predicate<Recipe<?>> pred, Function<Recipe<?>, T> converter) {
+        public CategoryBuilder<T> addAllRecipesIf(Predicate<RecipeHolder<?>> pred, Function<RecipeHolder<?>, RecipeHolder<T>> converter) {
             return addRecipeListConsumer(recipes -> consumeAllRecipes(recipe -> {
                 if (pred.test(recipe)) {
                     recipes.add(converter.apply(recipe));
@@ -165,17 +174,20 @@ public class GarnishedStoneAutomationJEI implements IModPlugin {
         public CategoryBuilder<T> addTypedRecipes(IRecipeTypeInfo recipeTypeEntry) {
             return addTypedRecipes(recipeTypeEntry::getType);
         }
-
-        public CategoryBuilder<T> addTypedRecipes(Supplier<RecipeType<? extends T>> recipeType) {
-            return addRecipeListConsumer(recipes -> CreateJEI.<T>consumeTypedRecipes(recipes::add, recipeType.get()));
+        public <I extends RecipeInput, R extends Recipe<I>> CategoryBuilder<T> addTypedRecipes(Supplier<RecipeType<R>> recipeType) {
+            return addRecipeListConsumer(recipes -> CreateJEI.<T>consumeTypedRecipes(recipe -> {
+                if (recipeClass.isInstance(recipe.value()))
+                    //noinspection unchecked - checked by if statement above
+                    recipes.add((RecipeHolder<T>) recipe);
+            }, recipeType.get()));
         }
 
-        public CategoryBuilder<T> addTypedRecipes(Supplier<RecipeType<? extends T>> recipeType, Function<Recipe<?>, T> converter) {
+        public CategoryBuilder<T> addTypedRecipes(Supplier<RecipeType<T>> recipeType, Function<RecipeHolder<?>, RecipeHolder<T>> converter) {
             return addRecipeListConsumer(recipes -> CreateJEI.<T>consumeTypedRecipes(recipe -> recipes.add(converter.apply(recipe)), recipeType.get()));
         }
 
-        public CategoryBuilder<T> addTypedRecipesIf(Supplier<RecipeType<? extends T>> recipeType, Predicate<Recipe<?>> pred) {
-            return addRecipeListConsumer(recipes -> CreateJEI.<T>consumeTypedRecipes(recipe -> {
+        public CategoryBuilder<T> addTypedRecipesIf(Supplier<RecipeType<? extends T>> recipeType, Predicate<RecipeHolder<?>> pred) {
+            return addRecipeListConsumer(recipes -> consumeTypedRecipesTyped(recipe -> {
                 if (pred.test(recipe)) {
                     recipes.add(recipe);
                 }
@@ -183,12 +195,12 @@ public class GarnishedStoneAutomationJEI implements IModPlugin {
         }
 
         public CategoryBuilder<T> addTypedRecipesExcluding(Supplier<RecipeType<? extends T>> recipeType,
-                                                           Supplier<RecipeType<? extends T>> excluded) {
+                                                                     Supplier<RecipeType<? extends T>> excluded) {
             return addRecipeListConsumer(recipes -> {
-                List<Recipe<?>> excludedRecipes = getTypedRecipes(excluded.get());
-                CreateJEI.<T>consumeTypedRecipes(recipe -> {
-                    for (Recipe<?> excludedRecipe : excludedRecipes) {
-                        if (doInputsMatch(recipe, excludedRecipe)) {
+                List<RecipeHolder<?>> excludedRecipes = getTypedRecipes(excluded.get());
+                consumeTypedRecipesTyped(recipe -> {
+                    for (RecipeHolder<?> excludedRecipe : excludedRecipes) {
+                        if (doInputsMatch(recipe.value(), excludedRecipe.value())) {
                             return;
                         }
                     }
@@ -199,47 +211,18 @@ public class GarnishedStoneAutomationJEI implements IModPlugin {
 
         public CategoryBuilder<T> removeRecipes(Supplier<RecipeType<? extends T>> recipeType) {
             return addRecipeListConsumer(recipes -> {
-                List<Recipe<?>> excludedRecipes = getTypedRecipes(recipeType.get());
+                List<RecipeHolder<?>> excludedRecipes = getTypedRecipes(recipeType.get());
                 recipes.removeIf(recipe -> {
-                    for (Recipe<?> excludedRecipe : excludedRecipes) {
-                        if (doInputsMatch(recipe, excludedRecipe)) {
+                    for (RecipeHolder<?> excludedRecipe : excludedRecipes)
+                        if (doInputsMatch(recipe.value(), excludedRecipe.value()) && doOutputsMatch(recipe.value(), excludedRecipe.value()))
                             return true;
-                        }
-                    }
                     return false;
                 });
             });
         }
 
-
-        public static List<Recipe<?>> getTypedRecipes(RecipeType<?> type) {
-            List<Recipe<?>> recipes = new ArrayList<>();
-            consumeTypedRecipes(recipes::add, type);
-            return recipes;
-        }
-
-        public static List<Recipe<?>> getTypedRecipesExcluding(RecipeType<?> type, Predicate<Recipe<?>> exclusionPred) {
-            List<Recipe<?>> recipes = getTypedRecipes(type);
-            recipes.removeIf(exclusionPred);
-            return recipes;
-        }
-
-        public static boolean doInputsMatch(Recipe<?> recipe1, Recipe<?> recipe2) {
-            if (recipe1.getIngredients()
-                    .isEmpty()
-                    || recipe2.getIngredients()
-                    .isEmpty()) {
-                return false;
-            }
-            ItemStack[] matchingStacks = recipe1.getIngredients()
-                    .get(0)
-                    .getItems();
-            if (matchingStacks.length == 0) {
-                return false;
-            }
-            return recipe2.getIngredients()
-                    .get(0)
-                    .test(matchingStacks[0]);
+        public CategoryBuilder<T> removeNonAutomation() {
+            return addRecipeListConsumer(recipes -> recipes.removeIf(AllRecipeTypes.CAN_BE_AUTOMATED.negate()));
         }
 
         public CategoryBuilder<T> catalystStack(Supplier<ItemStack> supplier) {
@@ -278,11 +261,11 @@ public class GarnishedStoneAutomationJEI implements IModPlugin {
         }
 
         public CreateRecipeCategory<T> build(String name, CreateRecipeCategory.Factory<T> factory) {
-            Supplier<List<T>> recipesSupplier;
+            Supplier<List<RecipeHolder<T>>> recipesSupplier;
             if (predicate.test(AllConfigs.server().recipes)) {
                 recipesSupplier = () -> {
-                    List<T> recipes = new ArrayList<>();
-                    for (Consumer<List<T>> consumer : recipeListConsumers)
+                    List<RecipeHolder<T>> recipes = new ArrayList<>();
+                    for (Consumer<List<RecipeHolder<T>>> consumer : recipeListConsumers)
                         consumer.accept(recipes);
                     return recipes;
                 };
@@ -297,17 +280,85 @@ public class GarnishedStoneAutomationJEI implements IModPlugin {
             Categories.add(category);
             return category;
         }
+
+        private void consumeAllRecipesOfType(Consumer<RecipeHolder<T>> consumer) {
+            consumeAllRecipes(recipeHolder -> {
+                if (recipeClass.isInstance(recipeHolder.value())) {
+                    //noinspection unchecked - this is checked by the if statement
+                    consumer.accept((RecipeHolder<T>) recipeHolder);
+                }
+            });
+        }
+
+        private void consumeTypedRecipesTyped(Consumer<RecipeHolder<T>> consumer, RecipeType<?> type) {
+            consumeTypedRecipes(recipeHolder -> {
+                if (recipeClass.isInstance(recipeHolder.value())) {
+                    //noinspection unchecked - this is checked by the if statement
+                    consumer.accept((RecipeHolder<T>) recipeHolder);
+                }
+            }, type);
+        }
     }
 
-    public static void consumeAllRecipes(Consumer<Recipe<?>> consumer) {
-        Objects.requireNonNull(Minecraft.getInstance()
-                        .getConnection())
+    public static MutableComponent translateDirect(String key, Object... args) {
+        return Component.translatable("recipe." + GarnishedStoneAutomation.MOD_ID + "." + key, resolveBuilders(args));
+    }
+
+
+    public static void consumeAllRecipes(Consumer<? super RecipeHolder<?>> consumer) {
+        Minecraft.getInstance()
+                .getConnection()
                 .getRecipeManager()
                 .getRecipes()
                 .forEach(consumer);
     }
 
-    public static MutableComponent translateDirect(String key, Object... args) {
-        return Component.translatable("recipe." + GarnishedStoneAutomation.MOD_ID + "." + key, resolveBuilders(args));
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static <T extends Recipe<?>> void consumeTypedRecipes(Consumer<RecipeHolder<?>> consumer, RecipeType<?> type) {
+        List<? extends RecipeHolder<?>> map = Minecraft.getInstance()
+                .getConnection()
+                .getRecipeManager().getAllRecipesFor((RecipeType) type);
+        if (!map.isEmpty())
+            map.forEach(consumer);
+    }
+
+    public static List<RecipeHolder<?>> getTypedRecipes(RecipeType<?> type) {
+        List<RecipeHolder<?>> recipes = new ArrayList<>();
+        consumeTypedRecipes(recipes::add, type);
+        return recipes;
+    }
+
+    public static List<RecipeHolder<?>> getTypedRecipesExcluding(RecipeType<?> type, Predicate<RecipeHolder<?>> exclusionPred) {
+        List<RecipeHolder<?>> recipes = getTypedRecipes(type);
+        recipes.removeIf(exclusionPred);
+        return recipes;
+    }
+
+    public static boolean doInputsMatch(Recipe<?> recipe1, Recipe<?> recipe2) {
+        if (recipe1.getIngredients()
+                .isEmpty()
+                || recipe2.getIngredients()
+                .isEmpty()) {
+            return false;
+        }
+        ItemStack[] matchingStacks = recipe1.getIngredients()
+                .getFirst()
+                .getItems();
+        if (matchingStacks.length == 0) {
+            return false;
+        }
+        return recipe2.getIngredients()
+                .getFirst()
+                .test(matchingStacks[0]);
+    }
+
+    public static boolean doOutputsMatch(Recipe<?> recipe1, Recipe<?> recipe2) {
+        RegistryAccess registryAccess = Minecraft.getInstance().level.registryAccess();
+        return ItemHelper.sameItem(recipe1.getResultItem(registryAccess), recipe2.getResultItem(registryAccess));
+    }
+
+    @Override
+    public void onRuntimeAvailable(IJeiRuntime runtime) {
+        CreateJEI.runtime = runtime;
     }
 }

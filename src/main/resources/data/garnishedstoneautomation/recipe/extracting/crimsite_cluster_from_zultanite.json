@@ -3,21 +3,21 @@
   "ingredients": [
     [
       {
-        "tag": "garnished:stone_types/zultanite/blue"
+        "tag": "garnished:stone_types/zultanite/red"
       }
     ]
   ],
-  "processingTime": 200,
+  "processing_time": 200,
   "results": [
     {
       "chance": 0.65,
       "count": 2,
-      "item": "garnishedstoneautomation:asurine_cluster"
+      "id": "garnishedstoneautomation:crimsite_cluster"
     },
     {
       "chance": 0.15,
       "count": 1,
-      "item": "garnishedstoneautomation:asurine_cluster"
+      "id": "garnishedstoneautomation:crimsite_cluster"
     }
   ]
 }

@@ -6,7 +6,7 @@
   "loops": 9,
   "results": [
     {
-      "item": "create:asurine"
+      "id": "create:crimsite"
     }
   ],
   "sequence": [
@@ -14,20 +14,20 @@
       "type": "create:deploying",
       "ingredients": [
         {
-          "item": "garnishedstoneautomation:incomplete_asurine"
+          "item": "garnishedstoneautomation:incomplete_crimsite"
         },
         {
-          "item": "garnishedstoneautomation:asurine_cluster"
+          "item": "garnishedstoneautomation:crimsite_cluster"
         }
       ],
       "results": [
         {
-          "item": "garnishedstoneautomation:incomplete_asurine"
+          "id": "garnishedstoneautomation:incomplete_crimsite"
         }
       ]
     }
   ],
-  "transitionalItem": {
-    "item": "garnishedstoneautomation:incomplete_asurine"
+  "transitional_item": {
+    "id": "garnishedstoneautomation:incomplete_crimsite"
   }
 }

@@ -1,32 +1,39 @@
 package net.dakotapride.garnishedstoneautomation;
 
-import com.simibubi.create.AllCreativeModeTabs;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
+//@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
 public class ModItemTabs {
-    private static final DeferredRegister<CreativeModeTab> TAB_REGISTER =
+    private static final DeferredRegister<CreativeModeTab> REGISTER =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, GarnishedStoneAutomation.MOD_ID);
 
-    public static final RegistryObject<CreativeModeTab> GARNISHED_STONE_AUTOMATION = TAB_REGISTER.register("create.garnished.stone_automation",
-            () -> CreativeModeTab.builder().title(Component.translatable("itemGroup.create.garnished.stone_automation"))
-                    .icon(() -> ModItems.ASURINE_CLUSTER.get().getDefaultInstance())
-                    .withTabsBefore(AllCreativeModeTabs.PALETTES_CREATIVE_TAB.getKey())
-                    .displayItems(new GarnishedStoneAutomationDisplayItemsGenerator()).build());
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> GARNISHED_STONE_AUTOMATION = REGISTER.register("create.garnished.stone_automation",
+            () -> CreativeModeTab.builder()
+                    .title(Component.translatable("itemGroup.create.garnished.stone_automation"))
+                    .icon(ModItems.ASURINE_CLUSTER::asStack)
+                    .displayItems(new GarnishedStoneAutomationDisplayItemsGenerator(true, ModItemTabs.GARNISHED_STONE_AUTOMATION))
+                    .build());
+
 
     public static class GarnishedStoneAutomationDisplayItemsGenerator implements CreativeModeTab.DisplayItemsGenerator {
-        public GarnishedStoneAutomationDisplayItemsGenerator() {
+
+        private final boolean addItems;
+        private final DeferredHolder<CreativeModeTab, CreativeModeTab> tabFilter;
+
+        public GarnishedStoneAutomationDisplayItemsGenerator(boolean addItems, DeferredHolder<CreativeModeTab, CreativeModeTab> tabFilter) {
+            this.addItems = addItems;
+            this.tabFilter = tabFilter;
         }
 
         @Override
-        public void accept(CreativeModeTab.@NotNull ItemDisplayParameters params, CreativeModeTab.@NotNull Output output) {
+        public void accept(CreativeModeTab.@NotNull ItemDisplayParameters parameters, CreativeModeTab.@NotNull Output output) {
             output.accept(ModBlocks.MECHANICAL_EXTRACTOR.asStack());
             output.accept(ModItems.ASURINE_CLUSTER.asStack());
             output.accept(ModItems.CRIMSITE_CLUSTER.asStack());
@@ -35,7 +42,8 @@ public class ModItemTabs {
         }
     }
 
+    @ApiStatus.Internal
     public static void init(IEventBus bus) {
-        TAB_REGISTER.register(bus);
+        REGISTER.register(bus);
     }
 }
